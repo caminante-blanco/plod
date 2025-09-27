@@ -147,7 +147,7 @@ fn widget_visuals(bg_fill: Color32) -> egui::style::WidgetVisuals {
         weak_bg_fill: BG1,
         bg_stroke: Stroke::NONE,
         corner_radius: egui::CornerRadius::ZERO,
-        fg_stroke: Stroke::new(1.0, FG1),
+        fg_stroke: Stroke::new(0.0, FG1),
         expansion: 0.0,
     }
 }

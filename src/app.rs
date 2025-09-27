@@ -1,3 +1,5 @@
+use crate::colors::*;
+use crate::dev_icons;
 use crate::theme::create_theme;
 use crate::tree_view_ui;
 
@@ -37,27 +39,43 @@ impl eframe::App for PortfolioApp {
 
         egui::SidePanel::left("file_tree")
             .default_width(200.0)
+            .min_width(50.0)
             .show(ctx, |ui| {
-                ui.heading("~/website");
-                ui.separator();
+                egui::ScrollArea::horizontal().show(ui, |ui| {
+                    ui.horizontal(|ui| {
+                        let icon_info = dev_icons::get_icon_for_folder(false);
+                        ui.add(
+                            egui::Label::new(
+                                egui::RichText::new(icon_info.icon).color(icon_info.color),
+                            )
+                            .selectable(false),
+                        );
+                        ui.heading("~/website");
+                    });
+                    ui.separator();
 
-                tree_view_ui::show(ui, ui.make_persistent_id("website_tree_id"), |builder| {
-                    builder.dir(0, "Personal");
-                    builder.leaf(1, "about-me.md");
-                    builder.close_dir();
+                    tree_view_ui::show(ui, ui.make_persistent_id("website_tree_id"), |builder| {
+                        builder.dir(0, "Personal");
+                        builder.leaf(1, "about-me.md");
+                        builder.close_dir();
 
-                    builder.dir(2, "Projects");
-                    builder.dir(3, "This_website");
-                    builder.leaf(4, "building-without-js.md");
-                    builder.close_dir();
-                    builder.leaf(5, "merge-perser.md");
-                    builder.close_dir();
+                        builder.dir(2, "Projects");
+                        builder.dir(3, "This_website");
+                        builder.leaf(4, "building-without-js.md");
+                        builder.close_dir();
+                        builder.leaf(5, "merge-perser.md");
+                        builder.close_dir();
 
-                    builder.dir(6, "Plod");
-                    builder.leaf(7, "first-post.md");
-                    builder.leaf(8, "getting-started-with-rust.md");
-                    builder.close_dir()
-                })
+                        builder.dir(6, "Plod");
+                        builder.leaf(7, "first-post.md");
+                        builder.leaf(8, "getting-started-with-rust.md");
+                        builder.close_dir()
+                    });
+                });
+                let rect = ui.clip_rect();
+                // Draw the line on the panel's right edge
+                ui.painter()
+                    .vline(rect.right(), rect.y_range(), egui::Stroke::new(5.0, BG3));
             });
 
         egui::CentralPanel::default().show(ctx, |ui| {
