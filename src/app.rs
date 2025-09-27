@@ -49,20 +49,17 @@ impl eframe::App for TemplateApp {
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             // The top panel is often a good place for a menu bar:
 
-            egui::MenuBar::new().ui(ui, |ui| {
-                // NOTE: no File->Quit on web pages!
-                let is_web = cfg!(target_arch = "wasm32");
-                if !is_web {
-                    ui.menu_button("File", |ui| {
-                        if ui.button("Quit").clicked() {
-                            ctx.send_viewport_cmd(egui::ViewportCommand::Close);
-                        }
-                    });
-                    ui.add_space(16.0);
-                }
+            ui.horizontal_centered(|ui| {
+                ui.heading("Plod - Walker White");
 
-                egui::widgets::global_theme_preference_buttons(ui);
-            });
+                if ui.button("Home").clicked() {
+                    todo!()
+                }
+                ui.add_space(8);
+                if ui.button("About").clicked() {
+                    todo!()
+                }
+            })
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
