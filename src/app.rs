@@ -55,7 +55,7 @@ impl eframe::App for TemplateApp {
                 if ui.button("Home").clicked() {
                     todo!()
                 }
-                ui.add_space(8);
+                ui.add_space(8.0);
                 if ui.button("About").clicked() {
                     todo!()
                 }
