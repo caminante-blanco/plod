@@ -1,4 +1,8 @@
 #![warn(clippy::all, rust_2018_idioms)]
 
 mod app;
-pub use app::TemplateApp;
+mod colors;
+mod theme;
+mod dev_icons;
+mod tree_view_ui;
+pub use app::PortfolioApp;

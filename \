@@ -1,5 +1,5 @@
-use crate::theme::create_theme;
-use crate::tree_view_ui;
+use crate::theme::create_style;
+use egui_ltreeview::TreeView;
 
 #[derive(serde::Deserialize, serde::Serialize, Default)]
 #[serde(default)]
@@ -13,13 +13,25 @@ impl PortfolioApp {
 
         // Load previous app state (if any).
         // Note that you must enable the `persistence` feature for this to work.
-        create_theme(&cc.egui_ctx);
+        let style = create_style();
+        cc.egui_ctx.set_style(style);
 
         if let Some(storage) = cc.storage {
             eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default()
-        } else {
-            Default::default()
         }
+
+        let mut app: Self = Default::default();
+
+        app.tree = egui_ltreeview::TreeView::new(vec![
+            (0, vec![]),
+            (1, vec![0]),
+            (2, vec![1]),
+            (3, vec![0]),
+            (4, vec![3]),
+            (5, vec![3]),
+        ]);
+
+        app
     }
 }
 
@@ -35,34 +47,29 @@ impl eframe::App for PortfolioApp {
             ui.label("NORMAL");
         });
 
-        egui::SidePanel::left("file_tree")
-            .default_width(200.0)
-            .show(ctx, |ui| {
-                ui.heading("~/website");
-                ui.separator();
-
-                tree_view_ui::show(ui, ui.make_persistent_id("website_tree_id"), |builder| {
-                    builder.dir(0, "Personal");
-                    builder.leaf(1, "about-me.md");
-                    builder.close_dir();
-
-                    builder.dir(2, "Projects");
-                    builder.dir(3, "This_website");
-                    builder.leaf(4, "building-without-js.md");
-                    builder.close_dir();
-                    builder.leaf(5, "merge-perser.md");
-                    builder.close_dir();
-
-                    builder.dir(6, "Plod");
-                    builder.leaf(7, "first-post.md");
-                    builder.leaf(8, "getting-started-with-rust.md");
-                    builder.close_dir()
-                })
-            });
+        egui::SidePanel::left("file_tree").show(ctx, |ui| {
+            ui.heading("~/website");
+            ui.label("blog/test.md");
+            ui.label("blog/test2.md");
+        });
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Welcome to Plod");
             ui.label("Central panel test");
         });
     }
+}
+
+fn powered_by_egui_and_eframe(ui: &mut egui::Ui) {
+    ui.horizontal(|ui| {
+        ui.spacing_mut().item_spacing.x = 0.0;
+        ui.label("Powered by ");
+        ui.hyperlink_to("egui", "https://github.com/emilk/egui");
+        ui.label(" and ");
+        ui.hyperlink_to(
+            "eframe",
+            "https://github.com/emilk/egui/tree/master/crates/eframe",
+        );
+        ui.label(".");
+    });
 }
