@@ -25,7 +25,7 @@ impl<'a, 'b> DevIconTreeBuilder<'a, 'b> {
 
         let node = NodeBuilder::dir(id)
             .default_open(is_top_level)
-            .label(RichText::new(label).color(GREEN))
+            .label(RichText::new(label).color(NEUTRAL_GREEN))
             .closer(|ui: &mut Ui, closer_state: CloserState| {
                 let icon_info = dev_icons::get_icon_for_folder(closer_state.is_open);
                 let closer_icon = if closer_state.is_open { " " } else { " " };

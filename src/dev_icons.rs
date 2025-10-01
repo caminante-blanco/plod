@@ -15,14 +15,14 @@ static ICONS_BY_FILENAME: Lazy<HashMap<&'static str, IconInfo>> = Lazy::new(|| {
         "cargo.toml",
         IconInfo {
             icon: " ",
-            color: FG1,
+            color: LIGHT1,
         },
     );
     m.insert(
         "license",
         IconInfo {
             icon: " ",
-            color: FG1,
+            color: LIGHT1,
         },
     );
     m
@@ -34,21 +34,21 @@ static ICONS_BY_EXTENSION: Lazy<HashMap<&'static str, IconInfo>> = Lazy::new(|| 
         "md",
         IconInfo {
             icon: " ",
-            color: BLUE,
+            color: NEUTRAL_BLUE,
         },
     );
     m.insert(
         "rs",
         IconInfo {
             icon: " ",
-            color: RED,
+            color: NEUTRAL_RED,
         },
     );
     m.insert(
         "toml",
         IconInfo {
             icon: " ",
-            color: FG1,
+            color: LIGHT1,
         },
     );
     m
@@ -56,17 +56,17 @@ static ICONS_BY_EXTENSION: Lazy<HashMap<&'static str, IconInfo>> = Lazy::new(|| 
 
 static DEFAULT_FILE_ICON: IconInfo = IconInfo {
     icon: " ",
-    color: FG1,
+    color: LIGHT1,
 };
 
 static DEFAULT_FOLDER_ICON: IconInfo = IconInfo {
     icon: " ",
-    color: GREEN,
+    color: NEUTRAL_GREEN,
 };
 
 static DEFAULT_FOLDER_OPEN_ICON: IconInfo = IconInfo {
     icon: " ",
-    color: GREEN,
+    color: NEUTRAL_GREEN,
 };
 
 pub fn get_icon_for_file(filename: &str) -> &'static IconInfo {
