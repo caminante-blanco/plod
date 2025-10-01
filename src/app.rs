@@ -2,8 +2,9 @@ use egui::text::LayoutJob;
 use egui::{Area, Color32, FontId, Layout, TextFormat};
 
 use crate::colors::*;
-use crate::colors::*;
+use crate::dev_icons;
 use crate::theme::create_theme;
+use crate::tree_view_ui;
 
 #[derive(serde::Deserialize, serde::Serialize)]
 pub struct AppConfig {
@@ -134,60 +135,108 @@ impl PortfolioApp {
                 .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::ZERO)
                 .show(ctx, |ui| {
                     ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
-                        let font_id = egui::FontId::monospace(16.0);
+                        egui::ScrollArea::vertical().show(ui, |ui| {
+                            let font_id = egui::FontId::monospace(16.0);
 
-                        let wrap_width = ui.fonts(|f| {
-                            f.layout_no_wrap("W".repeat(46), font_id.clone(), Color32::BLACK)
-                                .size()
-                                .x
+                            let wrap_width = ui.fonts(|f| {
+                                f.layout_no_wrap("W".repeat(46), font_id.clone(), Color32::BLACK)
+                                    .size()
+                                    .x
+                            });
+                            ui.set_max_width(wrap_width);
+
+                            let lines = get_welcome_lines();
+
+                            for line in lines {
+                                match line {
+                                    WelcomeLine::Text(text) => {
+                                        ui.label(egui::RichText::new(text).font(font_id.clone()));
+                                    }
+                                    WelcomeLine::URL(url) => {
+                                        let styled_url =
+                                            egui::RichText::new(&url).font(font_id.clone());
+                                        ui.hyperlink_to(styled_url, url);
+                                    }
+                                    WelcomeLine::Blank => {
+                                        ui.add_space(15.0);
+                                    }
+                                    WelcomeLine::Command {
+                                        command,
+                                        description,
+                                    } => {
+                                        ui.horizontal(|ui| {
+                                            ui.label(command);
+                                            ui.add_space(5.0);
+                                            ui.with_layout(
+                                                Layout::right_to_left(egui::Align::Center),
+                                                |ui| {
+                                                    ui.label(
+                                                        egui::RichText::new(&description)
+                                                            .font(FontId::monospace(16.0)),
+                                                    );
+                                                },
+                                            );
+                                        });
+                                    }
+                                };
+                            }
                         });
-                        //ui.set_max_width(wrap_width);
-
-                        let lines = get_welcome_lines();
-
-                        for line in lines {
-                            match line {
-                                WelcomeLine::Text(text) => {
-                                    ui.label(egui::RichText::new(text).font(font_id.clone()));
-                                }
-                                WelcomeLine::URL(url) => {
-                                    let styled_url =
-                                        egui::RichText::new(&url).font(font_id.clone());
-                                    ui.hyperlink_to(styled_url, url);
-                                }
-                                WelcomeLine::Blank => {
-                                    ui.add_space(15.0);
-                                }
-                                WelcomeLine::Command {
-                                    command,
-                                    description,
-                                } => {
-                                    ui.scope(|ui| {
-                                        ui.with_layout(
-                                            Layout::left_to_right(egui::Align::Center),
-                                            |ui| ui.label(command),
-                                        );
-                                        ui.with_layout(
-                                            Layout::right_to_left(egui::Align::Center),
-                                            |ui| {
-                                                ui.label(
-                                                    egui::RichText::new(&description)
-                                                        .font(FontId::monospace(16.0)),
-                                                )
-                                            },
-                                        );
-                                    });
-                                }
-                            };
-                        }
                     })
                 });
         });
     }
 
-    fn handle_input(&mut self, _ctx: &egui::Context, _frame: &mut eframe::Frame) {}
+    fn main_ui(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        egui::TopBottomPanel::bottom("status_bar").show(ctx, |ui| {
+            ui.label("NORMAL");
+        });
 
-    fn main_ui(&mut self, _ctx: &egui::Context) {}
+        egui::SidePanel::left("file_tree")
+            .default_width(200.0)
+            .min_width(50.0)
+            .show(ctx, |ui| {
+                egui::ScrollArea::horizontal().show(ui, |ui| {
+                    ui.horizontal(|ui| {
+                        let icon_info = dev_icons::get_icon_for_folder(false);
+                        ui.add(
+                            egui::Label::new(
+                                egui::RichText::new(icon_info.icon).color(icon_info.color),
+                            )
+                            .selectable(false),
+                        );
+                        ui.heading("~/website");
+                    });
+                    ui.separator();
+
+                    tree_view_ui::show(ui, ui.make_persistent_id("website_tree_id"), |builder| {
+                        builder.dir(0, "Personal");
+                        builder.leaf(1, "about-me.md");
+                        builder.close_dir();
+
+                        builder.dir(2, "Projects");
+                        builder.dir(3, "This_website");
+                        builder.leaf(4, "building-without-js.md");
+                        builder.close_dir();
+                        builder.leaf(5, "merge-perser.md");
+                        builder.close_dir();
+
+                        builder.dir(6, "Plod");
+                        builder.leaf(7, "first-post.md");
+                        builder.leaf(8, "getting-started-with-rust.md");
+                        builder.close_dir()
+                    });
+                });
+                let rect = ui.clip_rect();
+                // Draw the line on the panel's right edge
+                ui.painter()
+                    .vline(rect.right(), rect.y_range(), egui::Stroke::new(5.0, DARK3));
+            });
+
+        egui::CentralPanel::default().show(ctx, |ui| {
+            ui.heading("Welcome to Plod");
+            ui.label("Central panel test");
+        });
+    }
 }
 
 impl eframe::App for PortfolioApp {
@@ -203,8 +252,7 @@ impl eframe::App for PortfolioApp {
                 self.welcome_ui(ctx);
             }
             TopLevelState::Main => {
-                self.handle_input(ctx, frame);
-                self.main_ui(ctx);
+                self.main_ui(ctx, frame);
             }
         }
     }
@@ -239,17 +287,17 @@ fn get_welcome_lines() -> Vec<WelcomeLine> {
         WelcomeLine::URL("https://github.com/caminante-blanco".into()),
         WelcomeLine::Blank,
         WelcomeLine::Command {
-            command: create_layout_job(vec![("type i", LIGHT1), ("<ENTER>", LIGHT4)]),
+            command: create_layout_job(vec![("type  :Ex", LIGHT1), ("<ENTER>", LIGHT4)]),
             description: "to see the rest of the site!".into(),
         },
         WelcomeLine::Command {
-            command: create_layout_job(vec![("type :help", LIGHT1), ("<ENTER>", LIGHT4)]),
+            command: create_layout_job(vec![("type  :help", LIGHT1), ("<ENTER>", LIGHT4)]),
             //command: "type :help<Enter>".into(),
-            description: "If you've never used Vim before".into(),
+            description: "If you're new to Vim".into(),
         },
         WelcomeLine::Command {
             command: create_layout_job(vec![
-                ("type ", LIGHT1),
+                ("type  ", LIGHT1),
                 ("<LEADER>", LIGHT4),
                 ("ee", LIGHT1),
             ]),
@@ -258,7 +306,7 @@ fn get_welcome_lines() -> Vec<WelcomeLine> {
         },
         WelcomeLine::Command {
             command: create_layout_job(vec![
-                ("type ", LIGHT1),
+                ("type  ", LIGHT1),
                 ("<LEADER>", LIGHT4),
                 ("ef", LIGHT1),
             ]),
